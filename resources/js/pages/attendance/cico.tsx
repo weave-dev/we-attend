@@ -8,21 +8,27 @@ import { Label } from '@/components/ui/label';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { IDetectedBarcode } from '@yudiel/react-qr-scanner';
 import { CheckCircle2Icon } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function Attendance() {
     const { props } = usePage();
-
-    const { data, setData, post, errors } = useForm({
+    // const [codeValue, setCodeValue] = useState('');
+    const { data, setData, post, errors, transform, processing } = useForm({
         type: '',
         attendee: '',
     });
 
+    useEffect(() => {
+        console.log('Attendance page mounted', data.attendee);
+    });
+
     const alert = (detectedCodes: IDetectedBarcode[]) => {
-        if (detectedCodes.length === 0) {
-            // WIP: Qr code not detected
-            console.log(detectedCodes);
-            setData('attendee', detectedCodes[0].rawValue);
-        }
+        const [code] = detectedCodes;
+        transform((data) => ({
+            ...data,
+            attendee: code.rawValue,
+        }));
+        post('/attendances');
     };
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -35,6 +41,7 @@ export default function Attendance() {
             <div className="flex w-[680px] flex-col gap-4">
                 <h1 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
                     <span>Attendance</span>
+                    <span>{data.attendee}</span>
                 </h1>
                 {props.message !== undefined && (
                     <Alert className="mb-4 border-green-500">
@@ -47,7 +54,7 @@ export default function Attendance() {
 
                 <form onSubmit={handleSubmit} className="grid gap-4">
                     <div className="mx-auto h-[500px] w-[500px] overflow-hidden rounded-lg border border-white">
-                        <CodeScanner onScan={alert} />
+                        <CodeScanner onScan={alert} scanDelay={5000} allowMultiple={true} />
                     </div>
 
                     <div className="grid gap-2">
@@ -68,7 +75,7 @@ export default function Attendance() {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button className="w-full cursor-pointer" variant="default">
+                        <Button className="w-full cursor-pointer" variant="default" disabled={processing}>
                             Submit
                         </Button>
                     </div>
