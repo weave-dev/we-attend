@@ -50,8 +50,13 @@ class AttendanceController extends Controller
                     "clock_in_time" => now()
                 ]
             );
+
+            $message = 'Success! You have clocked in';
+            $clockStatus = 'in';
         } else {
             $attendance->update(["clock_out_time" => now()]);
+            $message = 'Success! You have clocked out';
+            $clockStatus = 'out';
         }
 
 
@@ -59,9 +64,7 @@ class AttendanceController extends Controller
             return back()->withErrors("attendance", "error creating attendance");
         }
 
-        return Inertia::render('attendance/cico', [
-            'message' => 'Success! Your attendance has been saved',
-        ]);
+        return Inertia::render('attendance/cico', compact('message', 'clockStatus'));
     }
 
     /**
