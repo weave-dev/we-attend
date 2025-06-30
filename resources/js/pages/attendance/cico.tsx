@@ -1,10 +1,12 @@
 import RealtimeClock from '@/components/custom/clock';
+import CodeScanner from '@/components/custom/code-scanner';
 import InputError from '@/components/input-error';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Link, useForm, usePage } from '@inertiajs/react';
+import { IDetectedBarcode } from '@yudiel/react-qr-scanner';
 import { CheckCircle2Icon } from 'lucide-react';
 
 export default function Attendance() {
@@ -14,6 +16,14 @@ export default function Attendance() {
         type: '',
         attendee: '',
     });
+
+    const alert = (detectedCodes: IDetectedBarcode[]) => {
+        if (detectedCodes.length === 0) {
+            // WIP: Qr code not detected
+            console.log(detectedCodes);
+            setData('attendee', detectedCodes[0].rawValue);
+        }
+    };
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -36,6 +46,10 @@ export default function Attendance() {
                 <RealtimeClock className="mb-4" />
 
                 <form onSubmit={handleSubmit} className="grid gap-4">
+                    <div className="mx-auto h-[500px] w-[500px] overflow-hidden rounded-lg border border-white">
+                        <CodeScanner onScan={alert} />
+                    </div>
+
                     <div className="grid gap-2">
                         <Label htmlFor="email">Member ID</Label>
                         <Input
