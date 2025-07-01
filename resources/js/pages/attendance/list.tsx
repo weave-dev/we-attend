@@ -1,4 +1,12 @@
 import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
     Table,
     TableBody,
     TableCell,
@@ -7,7 +15,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { LengthAwarePaginator, User, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -24,10 +32,11 @@ export type Attendance = {
     attendee: number;
     clock_in_time: string;
     clock_out_time: string;
+    user?: User;
 };
 
 export type Props = {
-    attendances: { data: Attendance[] };
+    attendances: LengthAwarePaginator<Attendance>;
 };
 
 export default function AttendanceList({ attendances }: Props) {
@@ -49,13 +58,53 @@ export default function AttendanceList({ attendances }: Props) {
                         {attendances.data.map((attendance) => (
                             <TableRow key={attendance.id}>
                                 <TableCell>{attendance.id}</TableCell>
-                                <TableCell>{attendance.user.name}</TableCell>
+                                <TableCell>{attendance.user?.name}</TableCell>
                                 <TableCell>{attendance.clock_in_time}</TableCell>
                                 <TableCell>{attendance.clock_out_time}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
+
+                <div className="flex items-center justify-end p-4">
+                    <Pagination>
+                        <PaginationContent>
+                            {attendances.links.map((link) => {
+                                if (link.label.toLowerCase().includes('previous')) {
+                                    return (
+                                        <PaginationItem>
+                                            <PaginationPrevious
+                                                href={
+                                                    attendances.prev_page_url ?? undefined
+                                                }
+                                            />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                if (link.label.toLowerCase().includes('next')) {
+                                    return (
+                                        <PaginationItem>
+                                            <PaginationNext
+                                                href={
+                                                    attendances.next_page_url ?? undefined
+                                                }
+                                            />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                return (
+                                    <PaginationItem>
+                                        <PaginationLink href={link.url ?? undefined}>
+                                            {link.label}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                );
+                            })}
+                        </PaginationContent>
+                    </Pagination>
+                </div>
             </div>
         </AppLayout>
     );

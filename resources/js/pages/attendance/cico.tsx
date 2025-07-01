@@ -11,7 +11,6 @@ import { CheckCircle2Icon } from 'lucide-react';
 
 export default function Attendance() {
     const { props } = usePage();
-    // const [codeValue, setCodeValue] = useState('');
     const { data, setData, post, errors, transform, reset, processing } = useForm({
         type: '',
         attendee: '',
@@ -32,7 +31,7 @@ export default function Attendance() {
     };
 
     const postForm = () =>
-        post('/attendances', {
+        post(route('attendance.store'), {
             onSuccess: () => {
                 reset('attendee');
             },
@@ -42,7 +41,7 @@ export default function Attendance() {
         <div className="h-screen overflow-auto">
             <div className="flex flex-col items-center justify-center py-12">
                 <div className="flex w-[680px] flex-col gap-4">
-                    <h1 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                    <h1 className="flex items-center gap-2 mb-4 text-2xl font-semibold">
                         <span>Attendance</span>
                         <span>{data.attendee}</span>
                     </h1>
