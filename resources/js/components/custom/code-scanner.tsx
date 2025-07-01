@@ -8,5 +8,11 @@ type ScannerProps = {
 };
 
 export default function CodeScanner(props: ScannerProps) {
-    return <Scanner {...props} />;
+    return (
+        <div className="grid gap-2">
+            <div className="h-[300px] w-[300px]">
+                <Scanner {...props} />
+            </div>
+        </div>
+    );
 }

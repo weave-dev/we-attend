@@ -12,8 +12,6 @@ Route::group(['as' => 'attendance.', 'prefix' => 'attendances', 'middleware' => 
     Route::post('/', [AttendanceController::class, 'store'])->name('store');
 
     Route::middleware(['auth'])->group(function () {
-        Route::get('/list', function () {
-            return Inertia::render('attendance/list');
-        })->name('list');
+        Route::get('/list', [AttendanceController::class, 'index'])->name('list');
     });
 });

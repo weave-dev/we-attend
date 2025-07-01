@@ -1,4 +1,11 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -10,25 +17,45 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function List() {
+const columns = ['id', 'name', 'clock in', 'clock out'];
+
+export type Attendance = {
+    id: number;
+    attendee: number;
+    clock_in_time: string;
+    clock_out_time: string;
+};
+
+export type Props = {
+    attendances: { data: Attendance[] };
+};
+
+export default function AttendanceList({ attendances }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Attendances" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            {columns.map((column) => (
+                                <TableHead key={column}>
+                                    {column.charAt(0).toUpperCase() + column.slice(1)}
+                                </TableHead>
+                            ))}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {attendances.data.map((attendance) => (
+                            <TableRow key={attendance.id}>
+                                <TableCell>{attendance.id}</TableCell>
+                                <TableCell>{attendance.user.name}</TableCell>
+                                <TableCell>{attendance.clock_in_time}</TableCell>
+                                <TableCell>{attendance.clock_out_time}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
         </AppLayout>
     );

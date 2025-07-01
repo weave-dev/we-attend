@@ -21,9 +21,4 @@ class Attendance extends Model
     {
         return $this->belongsTo(User::class, 'attendee');
     }
-
-    public function attendee()
-    {
-        return $this->user();
-    }
 }
