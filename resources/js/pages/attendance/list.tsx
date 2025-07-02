@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/input';
 import {
     Pagination,
     PaginationContent,
@@ -6,6 +7,13 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -40,10 +48,69 @@ export type Props = {
 };
 
 export default function AttendanceList({ attendances }: Props) {
+    const renderLinks = (link: LengthAwarePaginator<Attendance>['links'][number]) => {
+        if (link.label.toLowerCase().includes('previous')) {
+            return (
+                <PaginationItem key={link.url}>
+                    <PaginationPrevious
+                        isActive={link.active}
+                        href={attendances.prev_page_url ?? undefined}
+                    />
+                </PaginationItem>
+            );
+        }
+
+        if (link.label.toLowerCase().includes('next')) {
+            return (
+                <PaginationItem key={link.url}>
+                    <PaginationNext
+                        isActive={link.active}
+                        href={attendances.next_page_url ?? undefined}
+                    />
+                </PaginationItem>
+            );
+        }
+
+        return (
+            <PaginationItem key={link.url}>
+                <PaginationLink href={link.url ?? undefined} isActive={link.active}>
+                    {link.label}
+                </PaginationLink>
+            </PaginationItem>
+        );
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Attendances" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex flex-col flex-1 h-full gap-4 p-4 overflow-x-auto rounded-xl">
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center col-span-1 gap-2">
+                        <Input placeholder="Search" />
+                        <div className="shrink-0">
+                            <Select>
+                                <SelectTrigger className="w-48">
+                                    <SelectValue placeholder="Filter by User" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="user">Filter by User</SelectItem>
+                                    <SelectItem value="clock_in">
+                                        Filter by Clock In Time
+                                    </SelectItem>
+                                    <SelectItem value="clock_out">
+                                        Filter by Clock Out Time
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <Pagination className="justify-end col-span-1">
+                        <PaginationContent>
+                            {attendances.links.map(renderLinks)}
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -65,46 +132,6 @@ export default function AttendanceList({ attendances }: Props) {
                         ))}
                     </TableBody>
                 </Table>
-
-                <div className="flex items-center justify-end p-4">
-                    <Pagination>
-                        <PaginationContent>
-                            {attendances.links.map((link) => {
-                                if (link.label.toLowerCase().includes('previous')) {
-                                    return (
-                                        <PaginationItem>
-                                            <PaginationPrevious
-                                                href={
-                                                    attendances.prev_page_url ?? undefined
-                                                }
-                                            />
-                                        </PaginationItem>
-                                    );
-                                }
-
-                                if (link.label.toLowerCase().includes('next')) {
-                                    return (
-                                        <PaginationItem>
-                                            <PaginationNext
-                                                href={
-                                                    attendances.next_page_url ?? undefined
-                                                }
-                                            />
-                                        </PaginationItem>
-                                    );
-                                }
-
-                                return (
-                                    <PaginationItem>
-                                        <PaginationLink href={link.url ?? undefined}>
-                                            {link.label}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                );
-                            })}
-                        </PaginationContent>
-                    </Pagination>
-                </div>
             </div>
         </AppLayout>
     );

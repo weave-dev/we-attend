@@ -11,6 +11,11 @@ class Attendance extends Model
     /** @use HasFactory<\Database\Factories\AttendanceFactory> */
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\AttendanceFactory::new();
+    }
+
     protected $fillable = [
         'attendee',
         'clock_in_time',

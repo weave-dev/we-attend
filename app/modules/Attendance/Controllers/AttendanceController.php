@@ -18,7 +18,7 @@ class AttendanceController extends Controller
         $attendances = Attendance::with('user')
             ->orderBy('updated_at', 'desc')
             ->with('user')
-            ->paginate(1);
+            ->paginate(50);
 
         return Inertia::render('attendance/list', compact('attendances'));
     }
