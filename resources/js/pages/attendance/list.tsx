@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import {
     Pagination,
@@ -24,7 +26,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { LengthAwarePaginator, User, type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -47,7 +49,26 @@ export type Props = {
     attendances: LengthAwarePaginator<Attendance>;
 };
 
+const SearchFilter = {
+    USER: 'user',
+    CLOCK_IN_TIME: 'clock_in_time',
+    CLOCK_OUT_TIME: 'clock_out_time',
+} as const;
+
+type SearchFilterType = (typeof SearchFilter)[keyof typeof SearchFilter];
+
 export default function AttendanceList({ attendances }: Props) {
+    const { data, setData, get, processing, transform } = useForm<{
+        search: string;
+        filter: SearchFilterType;
+    }>({
+        search:
+            route().queryParams.search === undefined
+                ? ''
+                : (route().queryParams.search as string),
+        filter: (route().queryParams.filter as SearchFilterType) ?? SearchFilter.USER,
+    });
+
     const renderLinks = (link: LengthAwarePaginator<Attendance>['links'][number]) => {
         if (link.label.toLowerCase().includes('previous')) {
             return (
@@ -80,31 +101,87 @@ export default function AttendanceList({ attendances }: Props) {
         );
     };
 
+    const clearSearch = () => {
+        transform((data) => ({
+            ...data,
+            search: '',
+        }));
+        getForm();
+    };
+
+    const handleDateSelect = (date: Date) => {
+        setData('search', date.toUTCString());
+    };
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        getForm();
+    };
+
+    const getForm = () => get(route('attendance.list'));
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Attendances" />
-            <div className="flex flex-col flex-1 h-full gap-4 p-4 overflow-x-auto rounded-xl">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="grid grid-cols-2 gap-2">
-                    <div className="flex items-center col-span-1 gap-2">
-                        <Input placeholder="Search" />
-                        <div className="shrink-0">
-                            <Select>
-                                <SelectTrigger className="w-48">
-                                    <SelectValue placeholder="Filter by User" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="user">Filter by User</SelectItem>
-                                    <SelectItem value="clock_in">
-                                        Filter by Clock In Time
-                                    </SelectItem>
-                                    <SelectItem value="clock_out">
-                                        Filter by Clock Out Time
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <div className="col-span-full flex items-center gap-2">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="flex grow items-center gap-2"
+                        >
+                            <div className="shrink-0">
+                                <Select
+                                    onValueChange={(value: SearchFilterType) =>
+                                        setData('filter', value)
+                                    }
+                                    value={data.filter}
+                                >
+                                    <SelectTrigger className="w-48">
+                                        <SelectValue placeholder="Filter by User" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={SearchFilter.USER}>
+                                            Filter by User
+                                        </SelectItem>
+                                        <SelectItem value={SearchFilter.CLOCK_IN_TIME}>
+                                            Filter by Clock In Time
+                                        </SelectItem>
+                                        <SelectItem value={SearchFilter.CLOCK_OUT_TIME}>
+                                            Filter by Clock Out Time
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <Input
+                                placeholder="Search"
+                                onChange={(e) => setData('search', e.target.value)}
+                                value={data.search}
+                            />
+
+                            <DatePicker onDateSelect={handleDateSelect} />
+                            <Button
+                                className="shrink-0"
+                                disabled={processing}
+                                type="submit"
+                            >
+                                Search
+                            </Button>
+                            <Button
+                                className="shrink-0"
+                                disabled={processing}
+                                variant="outline"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    clearSearch();
+                                }}
+                            >
+                                Clear
+                            </Button>
+                        </form>
                     </div>
-                    <Pagination className="justify-end col-span-1">
+                    <Pagination className="col-span-full">
                         <PaginationContent>
                             {attendances.links.map(renderLinks)}
                         </PaginationContent>
